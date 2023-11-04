@@ -6,21 +6,26 @@ use std::thread::JoinHandle;
 pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
     assert!(worker_count > 0, "At least one worker is needed");
 
-    // Use a channel to send the worker result back, instead of the JoinHandle, to be able to merge
+    // Use a channel to send each worker result back, instead of the JoinHandle, to be able to merge
     // the results in order of worker completion (faster worker first) instead of a fixed order
     let (sender, receiver) = channel();
 
-    let handles: Vec<JoinHandle<()>> = (0..worker_count)
-        .map(|worker_number| {
-            let t_input: Vec<String> = input
-                .iter()
-                .skip(worker_number)
-                .step_by(worker_count)
+    // Compute the input size for each worker. Ceil division is done by hand since
+    // [the std implementation](https://github.com/rust-lang/rust/issues/88581) is not ready yet.
+    let worker_input_size = (input.len() + worker_count - 1) / worker_count;
+
+    let mut input_iterator = input.iter();
+
+    let join_handles: Vec<JoinHandle<()>> = (0..worker_count)
+        .map(|_| {
+            let worker_input: Vec<String> = input_iterator
+                .by_ref()
+                .take(worker_input_size)
                 .map(|s| s.to_lowercase())
                 .collect();
-            let t_sender = sender.clone();
+            let worker_sender = sender.clone();
 
-            thread::spawn(move || work(&t_input, &t_sender))
+            thread::spawn(move || work(&worker_input, &worker_sender))
         })
         .collect();
 
@@ -33,7 +38,7 @@ pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
         }
     }
 
-    for handle in handles {
+    for handle in join_handles {
         handle.join().unwrap();
     }
 
