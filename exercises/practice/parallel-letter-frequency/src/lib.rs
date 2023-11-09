@@ -3,6 +3,9 @@ use std::sync::mpsc::{channel, Sender};
 use std::thread;
 use std::thread::JoinHandle;
 
+/// # Panics
+/// The function panics if `worker_count` is 0.
+#[must_use]
 pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
     assert!(worker_count > 0, "At least one worker is needed");
 
@@ -21,7 +24,7 @@ pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
             let worker_input: Vec<String> = input_iterator
                 .by_ref()
                 .take(worker_input_size)
-                .map(|s| s.to_lowercase())
+                .map(|&s| s.to_string())
                 .collect();
             let worker_sender = sender.clone();
 
@@ -31,10 +34,10 @@ pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
 
     let mut map = receiver.recv().unwrap();
     for _ in 1..worker_count {
-        for entry in receiver.recv().unwrap() {
-            map.entry(entry.0)
-                .and_modify(|occurrences| *occurrences += entry.1)
-                .or_insert(entry.1);
+        for (chr, count) in receiver.recv().unwrap() {
+            map.entry(chr)
+                .and_modify(|occurrences| *occurrences += count)
+                .or_insert(count);
         }
     }
 
@@ -49,7 +52,7 @@ fn work(input: &[String], sender: &Sender<HashMap<char, usize>>) {
     let mut map = HashMap::new();
 
     for string in input {
-        for chr in string.chars().filter(|c| c.is_alphabetic()) {
+        for chr in string.to_lowercase().chars().filter(|c| c.is_alphabetic()) {
             map.entry(chr)
                 .and_modify(|occurrences| *occurrences += 1)
                 .or_insert(1);
