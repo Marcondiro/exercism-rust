@@ -1,51 +1,41 @@
 use std::collections::HashMap;
 use std::sync::mpsc::{channel, Sender};
 use std::thread;
-use std::thread::JoinHandle;
 
 /// # Panics
 /// The function panics if `worker_count` is 0.
 #[must_use]
 pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
     assert!(worker_count > 0, "At least one worker is needed");
+    if input.len() == 0 {
+        return  Default::default();
+    }
 
     // Use a channel to send each worker result back, instead of the JoinHandle, to be able to merge
     // the results in order of worker completion (faster worker first) instead of a fixed order
     let (sender, receiver) = channel();
 
     let worker_input_size = input.len().div_ceil(worker_count);
-    let mut input_iterator = input.iter();
 
-    let join_handles: Vec<JoinHandle<()>> = (0..worker_count)
-        .map(|_| {
-            let worker_input: Vec<String> = input_iterator
-                .by_ref()
-                .take(worker_input_size)
-                .map(|&s| s.to_string())
-                .collect();
+    thread::scope(|scope|{
+        for chunk in  input.chunks(worker_input_size) {
             let worker_sender = sender.clone();
-
-            thread::spawn(move || work(&worker_input, &worker_sender))
-        })
-        .collect();
-
-    let mut map = receiver.recv().unwrap();
-    for _ in 1..worker_count {
-        for (chr, count) in receiver.recv().unwrap() {
-            map.entry(chr)
-                .and_modify(|occurrences| *occurrences += count)
-                .or_insert(count);
+            scope.spawn(move || work(chunk, &worker_sender));
         }
-    }
 
-    for handle in join_handles {
-        handle.join().unwrap();
-    }
-
-    map
+        let mut map = receiver.recv().unwrap();
+        for _ in 1..input.chunks(worker_input_size).len() {
+            for (chr, count) in receiver.recv().unwrap() {
+                map.entry(chr)
+                    .and_modify(|occurrences| *occurrences += count)
+                    .or_insert(count);
+            }
+        }
+        map
+    })
 }
 
-fn work(input: &[String], sender: &Sender<HashMap<char, usize>>) {
+fn work(input: &[&str], sender: &Sender<HashMap<char, usize>>) {
     let mut map = HashMap::new();
 
     for string in input {
