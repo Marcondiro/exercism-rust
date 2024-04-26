@@ -7,8 +7,8 @@ use std::thread;
 #[must_use]
 pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
     assert!(worker_count > 0, "At least one worker is needed");
-    if input.len() == 0 {
-        return  Default::default();
+    if input.is_empty() {
+        return Default::default();
     }
 
     // Use a channel to send each worker result back, instead of the JoinHandle, to be able to merge
@@ -17,8 +17,8 @@ pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
 
     let worker_input_size = input.len().div_ceil(worker_count);
 
-    thread::scope(|scope|{
-        for chunk in  input.chunks(worker_input_size) {
+    thread::scope(|scope| {
+        for chunk in input.chunks(worker_input_size) {
             let worker_sender = sender.clone();
             scope.spawn(move || work(chunk, &worker_sender));
         }

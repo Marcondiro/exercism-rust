@@ -9,15 +9,11 @@ use test::Bencher;
 
 #[bench]
 fn bench_fifteen(b: &mut Bencher) {
-    b.iter(||
-        knapsack::maximum_value(MAX_WEIGHT, black_box(&ITEMS))
-    );
+    b.iter(|| knapsack::maximum_value(MAX_WEIGHT, black_box(&ITEMS)));
 }
 #[bench]
 fn bench_fifteen_brute_force(b: &mut Bencher) {
-    b.iter(||
-        maximum_value(MAX_WEIGHT, black_box(&ITEMS))
-    );
+    b.iter(|| maximum_value(MAX_WEIGHT, black_box(&ITEMS)));
 }
 
 /// Simple and inefficient brute force. Can it be beat?
