@@ -13,10 +13,7 @@ pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
     // the results in order of worker completion (faster worker first) instead of a fixed order
     let (sender, receiver) = channel();
 
-    // Compute the input size for each worker. Ceil division is done by hand since
-    // [the std implementation](https://github.com/rust-lang/rust/issues/88581) is not ready yet.
-    let worker_input_size = (input.len() + worker_count - 1) / worker_count;
-
+    let worker_input_size = input.len().div_ceil(worker_count);
     let mut input_iterator = input.iter();
 
     let join_handles: Vec<JoinHandle<()>> = (0..worker_count)
