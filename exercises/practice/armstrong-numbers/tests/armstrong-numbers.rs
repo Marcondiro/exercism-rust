@@ -6,67 +6,67 @@ fn zero_is_an_armstrong_number() {
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn single_digit_numbers_are_armstrong_numbers() {
     assert!(is_armstrong_number(5))
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn there_are_no_2_digit_armstrong_numbers() {
     assert!(!is_armstrong_number(10))
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn three_digit_armstrong_number() {
     assert!(is_armstrong_number(153))
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn three_digit_non_armstrong_number() {
     assert!(!is_armstrong_number(100))
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn four_digit_armstrong_number() {
     assert!(is_armstrong_number(9474))
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn four_digit_non_armstrong_number() {
     assert!(!is_armstrong_number(9475))
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn seven_digit_armstrong_number() {
     assert!(is_armstrong_number(9_926_315))
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn seven_digit_non_armstrong_number() {
     assert!(!is_armstrong_number(9_926_316))
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn nine_digit_armstrong_number() {
     assert!(is_armstrong_number(912_985_153));
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn nine_digit_non_armstrong_number() {
     assert!(!is_armstrong_number(999_999_999));
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn ten_digit_non_armstrong_number() {
     assert!(!is_armstrong_number(3_999_999_999));
 }
@@ -75,7 +75,7 @@ fn ten_digit_non_armstrong_number() {
 // and therefore will be detected as an Armstrong number if you are
 // incorrectly using wrapping arithmetic.
 #[test]
-#[ignore]
+//#[ignore]
 fn properly_handles_overflow() {
     assert!(!is_armstrong_number(4_106_098_957));
 }
